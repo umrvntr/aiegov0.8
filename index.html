@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>AIEGO Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>AIEGO Generator ⚡</h1>
+
+  <label>Prompt</label>
+  <textarea id="prompt" placeholder="Describe the image..."></textarea>
+
+  <label>Negative Prompt</label>
+  <textarea id="negative" placeholder="bad quality, blurry, distorted"></textarea>
+
+  <div class="row">
+    <div>
+      <label>Width</label>
+      <input type="number" id="width" value="1024">
+    </div>
+
+    <div>
+      <label>Height</label>
+      <input type="number" id="height" value="1024">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label>LoRA name</label>
+      <input id="lora-name" placeholder="V8-zimage.safetensors">
+    </div>
+    <div>
+      <label>Strength</label>
+      <input id="lora-strength" type="number" step="0.1" value="0.7">
+    </div>
+  </div>
+
+  <button id="generate">Generate</button>
+
+  <pre id="log"></pre>
+
+  <h2>Result</h2>
+  <div id="result"></div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
