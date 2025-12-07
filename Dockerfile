@@ -28,7 +28,25 @@ RUN pip install -r /app/ComfyUI/requirements.txt
 # --- Node-зависимости (runpod, fetch, ws) ---
 RUN npm install
 
-# --- скачиваем модели и ноды (если нужно) ---
+# ==============================================================================
+# ВАЖНО: Скачивание моделей
+# ==============================================================================
+# Для работы workflow из handler.mjs необходимы следующие модели:
+#
+# 1. UNET:   z_image_turbo_bf16.safetensors
+#            → /app/ComfyUI/models/unet/
+#
+# 2. CLIP:   qwen_3_4b.safetensors
+#            → /app/ComfyUI/models/clip/
+#
+# 3. VAE:    ae.safetensors
+#            → /app/ComfyUI/models/vae/
+#
+# 4. LoRA:   V8-zimage.safetensors (дефолтная, опционально другие)
+#            → /app/ComfyUI/models/loras/
+#
+# Убедись, что download_models.sh скачивает ВСЕ эти файлы в правильные папки!
+# ==============================================================================
 RUN /app/download_models.sh && /app/install_custom_nodes.sh
 
 # Serverless не требует EXPOSE, порты только внутри контейнера
