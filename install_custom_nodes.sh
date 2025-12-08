@@ -15,9 +15,9 @@ if [ ! -d "ComfyUI-Impact-Pack" ]; then
     echo ">>> Cloning ComfyUI-Impact-Pack..."
     git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
     cd ComfyUI-Impact-Pack
-    pip install -r requirements.txt --break-system-packages
+    pip3 install -r requirements.txt --break-system-packages
     # Submodules (Impact Pack needs this)
-    python install.py
+    python3 install.py
     cd ..
 else
     echo ">>> ComfyUI-Impact-Pack already exists, skipping..."
@@ -41,7 +41,7 @@ if [ ! -d "ComfyUI-CRT" ]; then
     git clone https://github.com/blib-la/ComfyUI-CRT.git
     cd ComfyUI-CRT
     if [ -f "requirements.txt" ]; then
-        pip install -r requirements.txt --break-system-packages
+        pip3 install -r requirements.txt --break-system-packages
     fi
     cd ..
 else
