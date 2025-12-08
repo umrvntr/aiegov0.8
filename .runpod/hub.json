@@ -1,0 +1,24 @@
+{
+  "title": "AIEGO v0.8",
+  "description": "Z-Image Turbo endpoint with FaceDetailer, Upscale, and CRT Post-Processing",
+  "type": "serverless",
+  "category": "image",
+  "iconUrl": "https://raw.githubusercontent.com/umrvntr/aiegov0.8/main/icon.png",
+  "config": {
+    "runsOn": "GPU",
+    "containerDiskInGb": 30,
+    "presets": [
+      {
+        "name": "Default",
+        "default": true,
+        "gpu": "AMPERE_24",
+        "workers": {
+          "min": 0,
+          "max": 3
+        }
+      }
+    ]
+  },
+  "env": [],
+  "readme": "# AIEGO - Z-Image Turbo Endpoint\n\nFast image generation with optional FaceDetailer and Upscaling.\n\n## Input Parameters\n\n| Parameter | Type | Default | Description |\n|-----------|------|---------|-------------|\n| prompt | string | required | Image description |\n| negative | string | \"bad quality, blurry\" | Negative prompt |\n| width | int | 1024 | Image width (512-2048) |\n| height | int | 1024 | Image height (512-2048) |\n| seed | int | random | Reproducibility seed |\n| loraName | string | null | LoRA filename |\n| loraStrength | float | 0.7 | LoRA strength |\n| useFaceDetailer | bool | false | Enable face enhancement |\n| useUpscale | bool | false | Enable upscaling |\n| upscaleFactor | float | 1.5 | Upscale multiplier |\n| pp | object | {} | Post-processing options |\n\n## Example Request\n\n```json\n{\n  \"input\": {\n    \"prompt\": \"a beautiful woman in a red dress\",\n    \"width\": 1024,\n    \"height\": 1024,\n    \"useFaceDetailer\": true\n  }\n}\n```"
+}
