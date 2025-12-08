@@ -1,43 +1,63 @@
 FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV COMFY_HOST=127.0.0.1:8188
+ENV PYTHONUNBUFFERED=1
 
-# --- базовые пакеты ---
-RUN apt update && apt install -y \
-    git wget curl python3 python3-pip ffmpeg ca-certificates gnupg \
-    && pip3 install --upgrade pip
+# ==============================================================================
+# 1. Install system packages
+# ==============================================================================
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    curl \
+    python3 \
+    python3-pip \
+    ffmpeg \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
 
-# --- Node.js 20 (LTS) ---
-RUN mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
-    && apt update \
-    && apt install -y nodejs
-
+# ==============================================================================
+# 2. Set working directory
+# ==============================================================================
 WORKDIR /app
 
-# --- ставим ComfyUI ---
+# ==============================================================================
+# 3. Clone ComfyUI
+# ==============================================================================
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git /app/ComfyUI
 
-# --- копируем твой код ---
-COPY handler.mjs /app/handler.mjs
-COPY package.json /app/package.json
+# ==============================================================================
+# 4. Install Python dependencies
+# ==============================================================================
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir \
+    runpod \
+    requests \
+    websocket-client \
+    && pip3 install --no-cache-dir -r /app/ComfyUI/requirements.txt
+
+# ==============================================================================
+# 5. Copy scripts
+# ==============================================================================
 COPY download_models.sh /app/download_models.sh
 COPY install_custom_nodes.sh /app/install_custom_nodes.sh
 COPY start.sh /app/start.sh
 
 RUN chmod +x /app/download_models.sh /app/install_custom_nodes.sh /app/start.sh
 
-# --- Python-зависимости ComfyUI ---
-RUN pip install -r /app/ComfyUI/requirements.txt
-
-# --- Node-зависимости (runpod, fetch, ws) ---
-RUN npm install
+# ==============================================================================
+# 6. Download models and install custom nodes
+# ==============================================================================
+RUN /app/download_models.sh
+RUN /app/install_custom_nodes.sh
 
 # ==============================================================================
-# Скачивание моделей и установка custom nodes
+# 7. Copy handler
 # ==============================================================================
-RUN /app/download_models.sh && /app/install_custom_nodes.sh
+COPY rp_handler.py /app/rp_handler.py
 
+# ==============================================================================
+# 8. Start
+# ==============================================================================
 CMD ["bash", "/app/start.sh"]

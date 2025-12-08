@@ -1,24 +1,18 @@
 #!/bin/bash
 set -e
 
-echo ">>> AI EGO Endpoint – startup"
+echo ">>> AIEGO Endpoint — Starting..."
 
-# 1) Стартуем ComfyUI
+# Start ComfyUI in background
 cd /app/ComfyUI
-echo ">>> Starting ComfyUI on :8188"
-python3 main.py --listen 0.0.0.0 --port 8188 --disable-auto-launch &
+echo ">>> Starting ComfyUI on port 8188..."
+python3 main.py --listen 127.0.0.1 --port 8188 --disable-auto-launch &
 
-COMFY_PID=$!
+# Wait a bit for ComfyUI to initialize
+echo ">>> Waiting for ComfyUI..."
+sleep 5
 
-# Ждём пока ComfyUI поднимется
-echo ">>> Waiting for ComfyUI to initialize..."
-sleep 10
-
-# 2) Стартуем RunPod handler
+# Start RunPod Python handler
 cd /app
 echo ">>> Starting RunPod handler..."
-node handler.mjs &
-
-NODE_PID=$!
-
-wait $COMFY_PID $NODE_PID
+exec python3 -u rp_handler.py
