@@ -4,61 +4,49 @@ set -e
 echo ">>> Installing Custom ComfyUI Nodes..."
 
 NODES_DIR="/app/ComfyUI/custom_nodes"
+ZIP_URL="https://huggingface.co/datasets/umrrrrrr/UMRGEN/resolve/main/custom_nodes.zip"
+TEMP_DIR="/tmp"
+ZIP_FILE="$TEMP_DIR/custom_nodes.zip"
 
+# Create nodes directory
 mkdir -p "$NODES_DIR"
-cd "$NODES_DIR"
+
+echo ">>> Downloading custom nodes from UMRGEN dataset..."
+wget -O "$ZIP_FILE" "$ZIP_URL"
+
+echo ">>> Extracting custom nodes to $NODES_DIR"
+# The zip is expected to contain the node folders directly (e.g., ComfyUI-Impact-Pack/)
+unzip -o "$ZIP_FILE" -d "$NODES_DIR"
+
+echo ">>> Cleaning up ZIP file..."
+rm "$ZIP_FILE"
+
+echo ">>> Installing dependencies for custom nodes..."
 
 # ==============================================================================
-# Impact Pack — FaceDetailer, UltralyticsDetectorProvider, SAMLoader
-# (Keeping original as it succeeded prior to the failure)
+# Impact Pack dependencies — FaceDetailer, UltralyticsDetectorProvider, SAMLoader
 # ==============================================================================
-if [ ! -d "ComfyUI-Impact-Pack" ]; then
-    echo ">>> Cloning ComfyUI-Impact-Pack..."
-    git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
-    cd ComfyUI-Impact-Pack
+IMPACT_PACK_DIR="$NODES_DIR/ComfyUI-Impact-Pack"
+if [ -d "$IMPACT_PACK_DIR" ]; then
+    echo ">>> Installing Impact Pack dependencies..."
+    cd "$IMPACT_PACK_DIR"
     pip3 install -r requirements.txt --break-system-packages
     # Submodules (Impact Pack needs this)
     python3 install.py
-    cd ..
-else
-    echo ">>> ComfyUI-Impact-Pack already exists, skipping..."
+    cd - > /dev/null # Go back to the previous directory
 fi
 
 # ==============================================================================
-# Comfyroll Custom Nodes — CR Upscale Image
+# ComfyUI-CRT dependencies — CRT Post-Process Suite node
 # ==============================================================================
-if [ ! -d "ComfyUI_Comfyroll_CustomNodes" ]; then
-    echo ">>> Cloning ComfyUI_Comfyroll_CustomNodes..."
-    git clone https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git
-else
-    echo ">>> ComfyUI_Comfyroll_CustomNodes already exists, skipping..."
-fi
-
-# ==============================================================================
-# CRT Post-Process Suite — CRT Post-Process Suite node
-# FIX: Added --depth 1 to resolve the unexpected 'fatal: could not read Username' error
-# ==============================================================================
-if [ ! -d "ComfyUI-CRT" ]; then
-    echo ">>> Cloning ComfyUI-CRT..."
-    # Changed git clone to be shallow
-    git clone --depth 1 https://github.com/blib-la/ComfyUI-CRT.git
-    cd ComfyUI-CRT
+CRT_DIR="$NODES_DIR/ComfyUI-CRT"
+if [ -d "$CRT_DIR" ]; then
+    echo ">>> Installing ComfyUI-CRT dependencies..."
+    cd "$CRT_DIR"
     if [ -f "requirements.txt" ]; then
         pip3 install -r requirements.txt --break-system-packages
     fi
-    cd ..
-else
-    echo ">>> ComfyUI-CRT already exists, skipping..."
-fi
-
-# ==============================================================================
-# ComfyUI Manager (опционально, но полезно для отладки)
-# ==============================================================================
-if [ ! -d "ComfyUI-Manager" ]; then
-    echo ">>> Cloning ComfyUI-Manager..."
-    git clone https://github.com/ltdrdata/ComfyUI-Manager.git
-else
-    echo ">>> ComfyUI-Manager already exists, skipping..."
+    cd - > /dev/null
 fi
 
 echo ">>> Custom nodes installed successfully!"
