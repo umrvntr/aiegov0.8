@@ -1,0 +1,34 @@
+{
+  "tests": [
+    {
+      "name": "basic_generation",
+      "input": {
+        "prompt": "a red apple on a wooden table, photorealistic",
+        "width": 1024,
+        "height": 1024
+      },
+      "timeout": 120000
+    },
+    {
+      "name": "with_face_detailer",
+      "input": {
+        "prompt": "portrait of a young woman, professional photo",
+        "width": 1024,
+        "height": 1024,
+        "useFaceDetailer": true
+      },
+      "timeout": 180000
+    },
+    {
+      "name": "with_upscale",
+      "input": {
+        "prompt": "landscape mountain sunset, 8k detailed",
+        "width": 1024,
+        "height": 1024,
+        "useUpscale": true,
+        "upscaleFactor": 1.5
+      },
+      "timeout": 180000
+    }
+  ]
+}
