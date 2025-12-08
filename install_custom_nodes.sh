@@ -10,6 +10,7 @@ cd "$NODES_DIR"
 
 # ==============================================================================
 # Impact Pack — FaceDetailer, UltralyticsDetectorProvider, SAMLoader
+# (Keeping original as it succeeded prior to the failure)
 # ==============================================================================
 if [ ! -d "ComfyUI-Impact-Pack" ]; then
     echo ">>> Cloning ComfyUI-Impact-Pack..."
@@ -35,10 +36,12 @@ fi
 
 # ==============================================================================
 # CRT Post-Process Suite — CRT Post-Process Suite node
+# FIX: Added --depth 1 to resolve the unexpected 'fatal: could not read Username' error
 # ==============================================================================
 if [ ! -d "ComfyUI-CRT" ]; then
     echo ">>> Cloning ComfyUI-CRT..."
-    git clone https://github.com/blib-la/ComfyUI-CRT.git
+    # Changed git clone to be shallow
+    git clone --depth 1 https://github.com/blib-la/ComfyUI-CRT.git
     cd ComfyUI-CRT
     if [ -f "requirements.txt" ]; then
         pip3 install -r requirements.txt --break-system-packages
