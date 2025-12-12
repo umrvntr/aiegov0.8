@@ -1,24 +1,18 @@
 #!/bin/bash
 set -e
 
+# Используем абсолютный путь
 BASE="/app/ComfyUI/models"
-ZIP_URL="https://huggingface.co/datasets/umrrrrrr/UMRGEN/resolve/main/core_models.zip"
-TEMP_DIR="/tmp"
-ZIP_FILE="$TEMP_DIR/core_models.zip"
+ZIP_URL="https://huggingface.co/datasets/umrrrrrrr/UMRGEN/resolve/main/core_models.zip"
+TEMP_ZIP="/tmp/core_models.zip"
 
-echo ">>> Downloading core models from UMRGEN dataset..."
-
-# Create the base models directory
+echo ">>> Downloading core models..."
 mkdir -p "$BASE"
 
-# Download the zip file
-wget -O "$ZIP_FILE" "$ZIP_URL"
+wget -O "$TEMP_ZIP" "$ZIP_URL"
 
-echo ">>> Extracting models to $BASE"
-# The zip is expected to contain the necessary subdirectories (unet, clip, vae, etc.)
-unzip -o "$ZIP_FILE" -d "$BASE"
+echo ">>> Extracting models..."
+unzip -o "$TEMP_ZIP" -d "$BASE"
+rm "$TEMP_ZIP"
 
-echo ">>> Cleaning up..."
-rm "$ZIP_FILE"
-
-echo ">>> All models downloaded successfully!"
+echo ">>> Models ready."

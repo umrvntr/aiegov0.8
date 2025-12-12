@@ -4,49 +4,45 @@ set -e
 echo ">>> Installing Custom ComfyUI Nodes..."
 
 NODES_DIR="/app/ComfyUI/custom_nodes"
-ZIP_URL="https://huggingface.co/datasets/umrrrrrr/UMRGEN/resolve/main/custom_nodes.zip"
-TEMP_DIR="/tmp"
-ZIP_FILE="$TEMP_DIR/custom_nodes.zip"
+# Убедись, что ссылка ведет на прямую скачку (resolve/main)
+ZIP_URL="https://huggingface.co/datasets/umrrrrrrr/UMRGEN/resolve/main/custom_nodes.zip"
+TEMP_ZIP="/tmp/custom_nodes.zip"
 
-# Create nodes directory
 mkdir -p "$NODES_DIR"
 
-echo ">>> Downloading custom nodes from UMRGEN dataset..."
-wget -O "$ZIP_FILE" "$ZIP_URL"
+echo ">>> Downloading custom nodes pack..."
+wget -O "$TEMP_ZIP" "$ZIP_URL"
 
-echo ">>> Extracting custom nodes to $NODES_DIR"
-# The zip is expected to contain the node folders directly (e.g., ComfyUI-Impact-Pack/)
-unzip -o "$ZIP_FILE" -d "$NODES_DIR"
+echo ">>> Extracting..."
+unzip -o "$TEMP_ZIP" -d "$NODES_DIR"
+rm "$TEMP_ZIP"
 
-echo ">>> Cleaning up ZIP file..."
-rm "$ZIP_FILE"
+echo ">>> 🛠️ FIXING GIT ISSUES..."
+# ЭТО ГЛАВНЫЙ ФИКС: Удаляем все скрытые папки .git внутри нод.
+# Это превращает их в обычные папки и предотвращает попытки git clone/fetch, требующие пароль.
+find "$NODES_DIR" -name ".git" -type d -exec rm -rf {} +
 
-echo ">>> Installing dependencies for custom nodes..."
+echo ">>> Installing dependencies for nodes..."
 
-# ==============================================================================
-# Impact Pack dependencies — FaceDetailer, UltralyticsDetectorProvider, SAMLoader
-# ==============================================================================
-IMPACT_PACK_DIR="$NODES_DIR/ComfyUI-Impact-Pack"
-if [ -d "$IMPACT_PACK_DIR" ]; then
-    echo ">>> Installing Impact Pack dependencies..."
-    cd "$IMPACT_PACK_DIR"
-    pip3 install -r requirements.txt --break-system-packages
-    # Submodules (Impact Pack needs this)
-    python3 install.py
-    cd - > /dev/null # Go back to the previous directory
+# Активируем venv для установки зависимостей
+source /app/venv/bin/activate
+
+# Проходимся по всем нодам и ставим их requirements.txt, если они есть
+for d in "$NODES_DIR"/*; do
+  if [ -d "$d" ] && [ -f "$d/requirements.txt" ]; then
+    echo "Installing requirements for $(basename "$d")..."
+    pip install -r "$d/requirements.txt" || echo "Warning: Failed to install deps for $(basename "$d")"
+  fi
+done
+
+# Специфичный фикс для Impact Pack (если нужен submodule update, он не сработает без .git, 
+# поэтому лучше, чтобы в ZIP архиве уже были все подмодули)
+IMPACT_DIR="$NODES_DIR/ComfyUI-Impact-Pack"
+if [ -d "$IMPACT_DIR" ]; then
+    echo "Processing Impact Pack..."
+    cd "$IMPACT_DIR"
+    # Пытаемся запустить install.py, если он есть
+    [ -f "install.py" ] && python install.py || true
 fi
 
-# ==============================================================================
-# ComfyUI-CRT dependencies — CRT Post-Process Suite node
-# ==============================================================================
-CRT_DIR="$NODES_DIR/ComfyUI-CRT"
-if [ -d "$CRT_DIR" ]; then
-    echo ">>> Installing ComfyUI-CRT dependencies..."
-    cd "$CRT_DIR"
-    if [ -f "requirements.txt" ]; then
-        pip3 install -r requirements.txt --break-system-packages
-    fi
-    cd - > /dev/null
-fi
-
-echo ">>> Custom nodes installed successfully!"
+echo ">>> Custom nodes installed!"
